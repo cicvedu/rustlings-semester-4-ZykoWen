@@ -9,7 +9,8 @@
 // Execute `rustlings hint from_str` or use the `hint` watch subcommand for a
 // hint.
 
-use std::num::ParseIntError;
+use std::num::IntErrorKind::InvalidDigit;
+use std::num::{IntErrorKind, ParseIntError};
 use std::str::FromStr;
 
 #[derive(Debug, PartialEq)]
@@ -28,10 +29,9 @@ enum ParsePersonError {
     // Empty name field
     NoName,
     // Wrapped error from parse::<usize>()
-    ParseInt(ParseIntError),
+    ParseInt(IntErrorKind),//把错误改成另一种类型
 }
 
-// I AM NOT DONE
 
 // Steps:
 // 1. If the length of the provided string is 0, an error should be returned
@@ -52,6 +52,24 @@ enum ParsePersonError {
 impl FromStr for Person {
     type Err = ParsePersonError;
     fn from_str(s: &str) -> Result<Person, Self::Err> {
+        if s.len()==0{
+            return Err(ParsePersonError::Empty);
+        }
+        let x:Vec<&str> = s.split(',').collect();
+        if x.len()!=2{
+            return Err(ParsePersonError::BadLen);
+        }
+        if x[0].len()==0{
+            return Err(ParsePersonError::NoName);
+        }
+        let person1 = Person{
+            name:x[0].to_string(),
+            age:{match x[1].parse::<usize>(){
+                Result::Ok(x)=>x,
+                Result::Err(_)=>{return Err(ParsePersonError::ParseInt(IntErrorKind::Zero));}
+            }}
+        };
+        Ok(person1)
     }
 }
 
